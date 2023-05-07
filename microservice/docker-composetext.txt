@@ -1,0 +1,87 @@
+version: "3.8"
+
+services:
+  #################################
+  # reward: The Reward microservice
+  #################################
+  reward:
+    build:
+      context: ./reward
+      dockerfile: Dockerfile
+      args:
+        DOCKERHUB_USERNAME: xuxinhui16
+        VERSION_TAG: 1.0
+    image: xuxinhui16/reward:1.0
+    restart: always
+    ports: 
+      - 5002:5002
+    environment:
+      dbURL: mysql+mysqlconnector://is213@host.docker.internal:3306/rewards
+    networks:
+      - my-net 
+
+  #################################
+  # user: The User microservice
+  #################################
+  user:
+    build:
+      context: ./user
+      dockerfile: Dockerfile
+      args:
+        DOCKERHUB_USERNAME: xuxinhui16
+        VERSION_TAG: 1.0
+    image: xuxinhui16/user:1.0
+    restart: always
+    ports: 
+      - 5001:5001
+    environment:
+      dbURL: mysql+mysqlconnector://is213@host.docker.internal:3306/user
+    networks:
+      - my-net 
+
+  #################################
+  # transaction: The Transaction microservice
+  #################################
+  transaction:
+    build:
+      context: ./transaction
+      dockerfile: Dockerfile
+      args:
+        DOCKERHUB_USERNAME: xuxinhui16
+        VERSION_TAG: 1.0
+    image: xuxinhui16/transaction:1.0
+    restart: always
+    ports: 
+      - 5050:5050
+    environment:
+      dbURL: mysql+mysqlconnector://is213@host.docker.internal:3306/transaction
+    networks:
+      - my-net 
+
+  ###############################################
+  # updatepoint: The update_point.py program
+  ###############################################
+  update_point:
+    build:
+      context: ./update_point
+      dockerfile: Dockerfile
+      args:
+        DOCKERHUB_USERNAME: xuxinhui16
+        VERSION_TAG: 1.0
+    image: xuxinhui16/updatepoint:1.0
+    depends_on:
+      - reward
+      - user
+      - transaction
+    ports: 
+      - 5100:5100
+    environment:
+      rewardURL: http://reward:5002/rewards
+      userURL: http://user:5001/user
+      transactionURL: http://transaction:5050/transaction
+    networks:
+      - my-net 
+
+
+networks:
+  my-net:

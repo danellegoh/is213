@@ -1,0 +1,285 @@
+version: "3.8"
+
+volumes:
+  rabbitmq_data:
+
+services:
+  #################################
+  # Event: The Event microservice
+  #################################
+  event:
+    build:
+      context: ./
+      dockerfile: event.Dockerfile
+      args:
+        DOCKERHUB_USERNAME: xuxinhui16
+        VERSION_TAG: 1.0
+    image: xuxinhui16/event:1.0
+    restart: always
+    ports: 
+      - 3333:3333
+    environment:
+      dbURL: mysql+mysqlconnector://is213@host.docker.internal:3306/events
+    networks:
+      - my-net 
+
+  #################################
+  # Participant: The Participant microservice
+  #################################
+  participant:
+    build:
+      context: ./
+      dockerfile: participant.Dockerfile
+      args:
+        DOCKERHUB_USERNAME: xuxinhui16
+        VERSION_TAG: 1.0
+    image: xuxinhui16/participant:1.0
+    restart: always
+    ports: 
+      - 3334:3334
+    environment:
+      dbURL: mysql+mysqlconnector://is213@host.docker.internal:3306/participant
+    networks:
+      - my-net 
+
+  #################################
+  # Reward: The Reward microservice
+  #################################
+  reward:
+    build:
+      context: ./
+      dockerfile: reward.Dockerfile
+      args:
+        DOCKERHUB_USERNAME: xuxinhui16
+        VERSION_TAG: 1.0
+    image: xuxinhui16/reward:1.0
+    restart: always
+    ports: 
+      - 5002:5002
+    environment:
+      dbURL: mysql+mysqlconnector://is213@host.docker.internal:3306/rewards
+    networks:
+      - my-net 
+
+  #################################
+  # User: The User microservice
+  #################################
+  user:
+    build:
+      context: ./
+      dockerfile: user.Dockerfile
+      args:
+        DOCKERHUB_USERNAME: xuxinhui16
+        VERSION_TAG: 1.0
+    image: xuxinhui16/user:1.0
+    restart: always
+    ports: 
+      - 5001:5001
+    environment:
+      dbURL: mysql+mysqlconnector://is213@host.docker.internal:3306/user
+    networks:
+      - my-net 
+
+  #################################
+  # Transaction: The Transaction microservice
+  #################################
+  transaction:
+    build:
+      context: ./
+      dockerfile: transaction.Dockerfile
+      args:
+        DOCKERHUB_USERNAME: xuxinhui16
+        VERSION_TAG: 1.0
+    image: xuxinhui16/transaction:1.0
+    restart: always
+    ports: 
+      - 5050:5050
+    environment:
+      dbURL: mysql+mysqlconnector://is213@host.docker.internal:3306/transaction
+    networks:
+      - my-net 
+
+  ###############################################
+  # Joinevent: The join_events.py program
+  ###############################################
+  join_event:
+    build:
+      context: ./
+      dockerfile: join_events.Dockerfile
+      args:
+        DOCKERHUB_USERNAME: xuxinhui16
+        VERSION_TAG: 1.0
+    image: xuxinhui16/joinevent:1.0
+    depends_on:
+      - participant
+      - event
+    ports: 
+      - 5008:5008
+    environment:
+      participantURL: http://participant:3334/participants
+      eventURL: http://event:3333/events
+    networks:
+      - my-net 
+
+  ###############################################
+  # Editevent: The edit_events.py program
+  ###############################################
+  edit_event:
+    build:
+      context: ./
+      dockerfile: edit_events.Dockerfile
+      args:
+        DOCKERHUB_USERNAME: xuxinhui16
+        VERSION_TAG: 1.0
+    image: xuxinhui16/editevent:1.0
+    restart: always
+    depends_on:
+      - participant
+      - event
+      - rabbitmq
+    ports: 
+      - 5007:5007
+    environment:
+      rabbit_host: rabbitmq
+      rabbit_port: 5672
+      participantURL: http://participant:3334/participants
+      eventURL: http://event:3333/events
+
+  ###############################################
+  # updatepoint: The update_point.py program
+  ###############################################
+  update_point:
+    build:
+      context: ./
+      dockerfile: update_point.Dockerfile
+      args:
+        DOCKERHUB_USERNAME: xuxinhui16
+        VERSION_TAG: 1.0
+    image: xuxinhui16/updatepoint:1.0
+    depends_on:
+      - transaction
+      - user
+      - reward
+    ports: 
+      - 5100:5100
+    environment:
+      transactionURL: http://transaction:5050/transaction
+      userURL: http://user:5001/user
+      rewardURL: http://reward:5002/rewards
+    networks:
+      - my-net
+
+  ###############################################
+  # Send Email: The Send Email microservice
+  ###############################################
+  sendEmail:
+    build:
+      context: ./
+      dockerfile: sendEmail.Dockerfile
+      args:
+        DOCKERHUB_USERNAME: xuxinhui16
+        VERSION_TAG: 1.0
+    image: xuxinhui16/sendemail:1.0
+    restart: always
+    depends_on:
+      - user
+      # - email_amqp_setup
+      - rabbitmq
+    environment:
+      rabbit_host: rabbitmq
+      rabbit_port: 5672
+      userURL: http://user:5001/user 
+      PYTHONUNBUFFERED: 1
+    ports:
+      - "5009:5009"
+
+  ###############################################
+  # Email Processing: The Email Processing microservice
+  ###############################################
+  emailprocessing:
+    build:
+      context: ./
+      dockerfile: emailProcessing.Dockerfile
+      args:
+        DOCKERHUB_USERNAME: xuxinhui16
+        VERSION_TAG: 1.0
+    image: xuxinhui16/emailprocessing:1.0
+    restart: always
+    depends_on:
+      - rabbitmq
+      # - email_amqp_setup
+    environment:
+      rabbit_host: rabbitmq
+      rabbit_port: 5672
+      PYTHONUNBUFFERED: 1
+  
+  # ###############################################
+  # # Telegram: The Telegram microservice
+  # ###############################################
+  telegram:
+    build:
+      context: ./
+      dockerfile: telegram.Dockerfile
+      args:
+        DOCKERHUB_USERNAME: xuxinhui16
+        VERSION_TAG: 1.0
+    image: xuxinhui16/telegram:1.0
+    restart: always
+    depends_on:
+      - rabbitmq
+      # - tele_amqp_setup
+    environment:
+      rabbit_host: rabbitmq
+      rabbit_port: 5672
+      PYTHONUNBUFFERED: 1
+
+  ####################################
+  # RabbitMQ: The messaging broker   
+  ####################################
+  rabbitmq:
+    image: rabbitmq:3-management
+    hostname: esd-g7t6-rabbit
+    restart: always
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    volumes: 
+      - rabbitmq_data:/var/lib/rabbitmq
+
+  # ####################################
+  # # Telegram AMQP: The messaging broker for Telegram 
+  # ####################################
+  # tele_amqp_setup:
+  #   build:
+  #     context: ./
+  #     dockerfile: tele_amqp_setup.Dockerfile
+  #     args:
+  #   image: xuxinhui16/tele_amqp_setup:1.0
+  #   hostname: esd-g7t6-rabbit
+  #   restart: always
+  #   ports:
+  #     - 5672:5672
+  #     - 15672:15672
+  #   volumes: 
+  #     - rabbitmq_data:/var/lib/rabbitmq
+
+  # # ####################################
+  # # # Email RabbitMQ: The messaging broker to send emails
+  # # ####################################
+  # email_amqp_setup:
+  #   # build:
+  #   #   context: ./
+  #   #   dockerfile: email_amqp_setup.Dockerfile
+  #   #   args:
+
+  #   image: rabbitmq:3-management
+  #   hostname: esd-g7t6-rabbit
+  #   restart: always
+  #   ports:
+  #     - "5672:5672"
+  #     # - "15672:15672"
+  #   volumes: 
+  #     - rabbitmq_data:/var/lib/rabbitmq
+
+networks:
+  my-net:

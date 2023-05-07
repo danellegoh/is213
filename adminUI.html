@@ -1,0 +1,157 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Bundled Bootstrap JS --> 
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/js/bootstrap.bundle.min.js"  
+    integrity="sha384-A3rJD856KowSb7dwlZdYEkO39Gagi7vIsF0jrRAoQmDKKtQBHUuLZ9AsSv4jD4Xa"  
+    crossorigin="anonymous"></script>
+
+    <!-- Boostrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/css/bootstrap.min.css" 
+        rel="stylesheet" 
+        integrity="sha384-gH2yIJqKdNHPEq0n4Mqa/HGKIhSkIHeL5AyhkYV8i59U5AR6csBvApHHNl/vI1Bx" 
+        crossorigin="anonymous">
+
+    <!-- link to Admin UI CSS -->
+    <link rel="stylesheet" type="text/css" href="adminUI.css">
+
+    <!-- Latest compiled and minified JavaScript -->
+    <script
+       src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+    <div id="intro">
+        <h1 class="poppinsSemiBold">ADMIN UI</h1>
+    </div>
+
+    <br>
+
+    <div class="bg" id="createReward">
+        <h2>Credit a special reward for all users</h2>
+        <form>
+            <label for="rewardName" class="form-label">Reward Name</label>
+            <input type="text" class="form-control" id="rewardName">
+
+            <br>
+
+            <label for="discount" class="form-label">Discount (in %)</label>
+            <input type="text" class="form-control" id="discount">
+
+            <br>
+
+            <label for="quantity" class="form-label">Quantity</label>
+            <input type="number" class="form-control" id="quantity">
+
+            <br>
+
+            <label for="month" class="form-label">Month (as integer e.g. 4)</label>
+            <input type="number" class="form-control" id="month">
+
+            <br>
+
+            <!-- <button type="submit" class="btn btn-primary">Submit</button> -->
+            <button type="submit" id="submit1" class="btn btn-primary">Create</button>
+        </form>
+    </div>
+
+    <br>
+
+    <div class="bg" id="notifyReward">
+        <h2>Notify users of available rewards via email</h2>
+        <form>
+            <div id="emailInput">
+                <label for="emailSubject" class="form-label">Email Subject</label>
+                <input type="text" class="form-control" id="emailSubject">
+
+                <br>
+
+                <label for="emailBody">Email Body</label>
+                <textarea class="form-control" rows="5" id="emailBody"></textarea>
+            </div>
+
+            <br>
+
+            <!-- <button type="submit" class="btn btn-primary">Submit</button> -->
+            <button type="submit" id="submit2" class="btn btn-primary">Notify</button>
+        </form>
+    </div>
+
+    <br>
+
+    <div class="bg2" id="createDiv">
+        <h2>Create New Event</h2>
+        <form>
+            <div id="createEvent">
+                <label for="eventTitle" class="form-label">Event Title</label>
+                <input type="text" class="form-control" id="eventTitle">
+
+                <br>
+
+                <label for="eventDesc">Event Description</label>
+                <textarea class="form-control" rows="3" id="eventDesc"></textarea>
+
+                <br>
+
+                <label for="eventDate">Event Date (DD/MM/YYYY) </label>
+                <input type="text" class="form-control" id="eventDate">
+
+                <br>
+
+                <label for="eventStart">Event Start Time (eg: 10pm) </label>
+                <input type="text" class="form-control" id="eventStart">
+
+                <br>
+
+                <label for="eventEnd">Event End Time (eg: 10pm)</label>
+                <input type="text" class="form-control" id="eventEnd">
+
+                <br>
+
+                <label for="eventMaxPax">Event Max Pax</label>
+                <input type="number" class="form-control" id="eventMaxPax">
+            </div>
+
+            <br>
+
+            <button type="submit" id="submit3" class="btn btn-primary">Create</button>
+        </form>
+    </div>
+
+    <br>
+
+    <div class="bg2" id="notifyEvent">
+        <h2>Notify users of available events via Telegram</h2>
+        <form>
+            <div id="msgInput">
+                <label for="msgBody">Message Body</label>
+                <textarea class="form-control" rows="5" id="msgBody"></textarea>
+            </div>
+
+            <br>
+
+            <!-- <button type="submit" class="btn btn-primary">Submit</button> -->
+            <button type="submit" id="submit4" class="btn btn-primary">Notify</button>
+        </form>
+    </div>
+
+    <br>
+
+    <div class="bg2" id="deleteEvent">
+        <h2>Manage upcoming events</h2>
+            <div id="displayAllEvents"></div>
+    </div>
+    
+    <!-- Bootstrap Javascript; at the end of the <body> -->
+    <script 
+    src='https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js'
+    integrity='sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM'
+    crossorigin='anonymous'></script>
+
+    <script src="adminUI.js"></script>
+</body>
+</html>
